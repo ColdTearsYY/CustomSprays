@@ -48,18 +48,19 @@ public class EventListenerNew implements Listener {
      */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onToggleF(PlayerSwapHandItemsEvent e) {
-        Bukkit.getScheduler().runTaskAsynchronously(CustomSprays.plugin, () -> {
-            Player player = e.getPlayer();
+        Player player = e.getPlayer();
+        boolean isSneaking = player.isSneaking();
+        fun.LSDog.CustomSprays.util.SchedulerUtil.runTaskAsynchronously(CustomSprays.plugin, () -> {
             UUID uuid = player.getUniqueId();
             Long t = timeMap.get(uuid);
             if ( t==null || System.currentTimeMillis() > t) {
                 timeMap.put(uuid, System.currentTimeMillis() + CD);
             } else {
                 timeMap.remove(uuid);
-                if (!player.isSneaking()) { // 小喷漆
-                    Bukkit.getScheduler().runTaskAsynchronously(CustomSprays.plugin, () -> SprayManager.spray(player, false));
+                if (!isSneaking) { // 小喷漆
+                    fun.LSDog.CustomSprays.util.SchedulerUtil.runTask(CustomSprays.plugin, player, () -> SprayManager.spray(player, false));
                 } else { // 大喷漆
-                    Bukkit.getScheduler().runTaskAsynchronously(CustomSprays.plugin, () -> SprayManager.spray(player, true));
+                    fun.LSDog.CustomSprays.util.SchedulerUtil.runTask(CustomSprays.plugin, player, () -> SprayManager.spray(player, true));
                 }
             }
         });

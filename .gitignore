@@ -3,3 +3,7 @@
 CustomSprays.iml
 /test/
 /CopyJarToServer.bat
+target/
+dependency-reduced-pom.xml
+Test.class
+Test.java

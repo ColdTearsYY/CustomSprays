@@ -4,6 +4,7 @@ main: fun.LSDog.CustomSprays.CustomSprays
 authors: [LSDog]
 softdepend: [PlaceholderAPI,WorldEdit,FastAsyncWorldEdit,Residence,WorldGuard,GriefDefender,Vault]
 api-version: 1.13
+folia-supported: true
 
 commands:
   customsprays:

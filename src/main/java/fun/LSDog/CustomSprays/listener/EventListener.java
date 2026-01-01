@@ -39,9 +39,14 @@ public class EventListener implements Listener {
 
     public static void playerJoin(Player player) {
         // Initialize account
-        Bukkit.getScheduler().runTaskLaterAsynchronously(CustomSprays.plugin, () -> {
-            if (player.isOnline() && DataManager.data instanceof DataMySQL) {
-                DataMySQL.addAccountIfNotExist(player);
+        fun.LSDog.CustomSprays.util.SchedulerUtil.runTaskLaterAsynchronously(CustomSprays.plugin, () -> {
+            if (player.isOnline()) {
+                if (DataManager.isMySQL) {
+                    DataMySQL.addAccountIfNotExist(player);
+                }
+                // Preload cache
+                DataManager.data.getImageBytes(player);
+                DataManager.data.getCopyAllowed(player);
             }
         }, 10L);
         // Send existing spray
@@ -63,6 +68,7 @@ public class EventListener implements Listener {
     @EventHandler (priority = EventPriority.LOWEST)
     public void onQuit(PlayerQuitEvent e) {
         Player player = e.getPlayer();
+        DataManager.data.invalidateCache(player);
         SprayManager.removeShownPlayer(player);
         if (NMS.getSubVer() >= 8) PacketListener.removePlayer(player);
         else PacketListener7.removePlayer(player);
@@ -114,12 +120,13 @@ public class EventListener implements Listener {
 
             boolean finalIsInfinite = isInfinite;
             int finalUseTimeLineIndex = useTimeLineIndex;
-            Bukkit.getScheduler().runTaskAsynchronously(CustomSprays.plugin, () -> {
+            boolean isSneaking = player.isSneaking();
+            fun.LSDog.CustomSprays.util.SchedulerUtil.runTask(CustomSprays.plugin, player, () -> {
                 if (finalIsInfinite) {
-                    SprayManager.spray(player, player.isSneaking());
+                    SprayManager.spray(player, isSneaking);
                     return;
                 }
-                if (useTime[0] >= 1 && SprayManager.spray(player, player.isSneaking())) {
+                if (useTime[0] >= 1 && SprayManager.spray(player, isSneaking)) {
                     useTime[0] -= 1;
                     if (CustomSprays.plugin.getConfig().getBoolean("destroy_if_exhausted") && useTime[0] <= 0) item.setType(Material.AIR);
                     player.sendMessage(CustomSprays.prefix + ChatColor.translateAlternateColorCodes('&',

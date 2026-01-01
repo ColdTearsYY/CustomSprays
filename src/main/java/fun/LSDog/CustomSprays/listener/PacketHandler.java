@@ -56,7 +56,7 @@ public class PacketHandler {
             Player owner = spray.player;
             if (player != owner && !player.hasPermission("CustomSprays.delete")) return false;
             // try to remove it
-            Bukkit.getScheduler().runTask(CustomSprays.plugin, () -> {
+            fun.LSDog.CustomSprays.util.SchedulerUtil.runTask(CustomSprays.plugin, player, () -> {
                 spray.remove();
                 if (player.hasPermission("CustomSprays.delete")) {
                     player.sendMessage(CustomSprays.prefix + "§7[" + spray.player.getName() + "§7]");

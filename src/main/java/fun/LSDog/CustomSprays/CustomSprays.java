@@ -37,9 +37,7 @@ public class CustomSprays extends JavaPlugin {
             Class.forName("fun.LSDog.CustomSprays.spray.SprayManager").getMethod("removeAllSpray").invoke(null);
         } catch (Exception ignored) { }
         // cancel async tasks
-        Bukkit.getScheduler().getActiveWorkers().forEach(bukkitWorker -> {
-            if (bukkitWorker.getOwner().getName().equals("CustomSprays")) bukkitWorker.getThread().interrupt();
-        });
+        fun.LSDog.CustomSprays.util.SchedulerUtil.cancelTasks(this);
         if (NMS.getSubVer() >= 8) getServer().getOnlinePlayers().forEach(PacketListener::removePlayer);
         else getServer().getOnlinePlayers().forEach(PacketListener7::removePlayer);
         log("CustomSprays disabled.");
@@ -98,7 +96,7 @@ public class CustomSprays extends JavaPlugin {
         new Metrics(this, 13633);
 
         // 检查更新
-        if (getConfig().getBoolean("check_update")) Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+        if (getConfig().getBoolean("check_update")) fun.LSDog.CustomSprays.util.SchedulerUtil.runTaskAsynchronously(this, () -> {
            String pluginVersion = CustomSprays.plugin.getDescription().getVersion();
            String latestVersion = UpdateChecker.checkGithub();
            if (latestVersion == null) latestVersion = UpdateChecker.checkGitee();
@@ -109,7 +107,7 @@ public class CustomSprays extends JavaPlugin {
 
         // 计算颜色板
         if (getConfig().getBoolean("better_color") && NMS.getSubVer() >= 8) {
-            Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+            fun.LSDog.CustomSprays.util.SchedulerUtil.runTaskAsynchronously(this, () -> {
                 log("Loading Color Palette");
                 if (!MapColors.loadColorPalette()) {
                     MapColors.calculateColorPalette();

@@ -17,6 +17,7 @@ import org.bukkit.entity.Player;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 public class SprayManager {
@@ -113,12 +114,12 @@ public class SprayManager {
         String soundName = CustomSprays.plugin.getConfig().getString("spray_sound");
         if (soundName == null || "default".equals(soundName)) {
             Sound sound = Sound.valueOf(NMS.getSubVer() <= 8 ? "SILVERFISH_HIT" : "ENTITY_SILVERFISH_HURT");
-            Bukkit.getScheduler().runTask(CustomSprays.plugin, () ->
+            fun.LSDog.CustomSprays.util.SchedulerUtil.runTask(CustomSprays.plugin, player, () ->
                     player.getWorld().playSound(player.getLocation(), sound, 1, 0.8F));
         } else {
             String[] strings = soundName.split("-");
             if (strings.length != 3) return;
-            Bukkit.getScheduler().runTask(CustomSprays.plugin, () ->
+            fun.LSDog.CustomSprays.util.SchedulerUtil.runTask(CustomSprays.plugin, player, () ->
                     player.getWorld().playSound(player.getLocation(), strings[0], Float.parseFloat(strings[1]), Float.parseFloat(strings[2])));
         }
     }
@@ -133,7 +134,7 @@ public class SprayManager {
         else if (subVer <= 12) soundName = "BLOCK_CLOTH_HIT";
         else soundName = "BLOCK_WOOL_HIT";
         Sound sound = Sound.valueOf(soundName);
-        Bukkit.getScheduler().runTask(CustomSprays.plugin, () ->
+        fun.LSDog.CustomSprays.util.SchedulerUtil.runTask(CustomSprays.plugin, player, () ->
                 player.getWorld().playSound(player.getLocation(), sound, 1, 1.2F));
 
     }
@@ -150,13 +151,8 @@ public class SprayManager {
      */
     public static void addSpray(SprayBase spray) {
 
-        List<SprayBase> list = playerSprayMap.getOrDefault(spray.player.getUniqueId(), new ArrayList<>());
-        list.add(spray);
-        playerSprayMap.put(spray.player.getUniqueId(), list);
-
-        List<SprayBase> locList = locationSprayMap.getOrDefault(spray.block, new ArrayList<>());
-        locList.add(spray);
-        locationSprayMap.put(spray.block, locList);
+        playerSprayMap.computeIfAbsent(spray.player.getUniqueId(), k -> new CopyOnWriteArrayList<>()).add(spray);
+        locationSprayMap.computeIfAbsent(spray.block, k -> new CopyOnWriteArrayList<>()).add(spray);
 
         itemframeIdMap.put(spray.itemFrameId, spray);
 
@@ -167,7 +163,7 @@ public class SprayManager {
      */
     public static void sendExistSprays(Player player) {
 
-        Bukkit.getScheduler().runTaskLaterAsynchronously(CustomSprays.plugin, () -> SprayManager.playerSprayMap.values().forEach(sprays -> sprays.forEach(spray -> {
+        fun.LSDog.CustomSprays.util.SchedulerUtil.runTaskLater(CustomSprays.plugin, player, () -> SprayManager.playerSprayMap.values().forEach(sprays -> sprays.forEach(spray -> {
             try {
                 spray.spawn(Collections.singletonList(player.getUniqueId()), false, false);
             } catch (Throwable e) {
@@ -238,13 +234,11 @@ public class SprayManager {
      */
     public static void removeSpray(SprayBase spray) {
 
-        List<SprayBase> playerSprayList = playerSprayMap.getOrDefault(spray.player.getUniqueId(), new ArrayList<>());
-        if (!playerSprayList.isEmpty()) playerSprayList.remove(spray);
-        playerSprayMap.put(spray.player.getUniqueId(), playerSprayList);
+        List<SprayBase> playerSprayList = playerSprayMap.get(spray.player.getUniqueId());
+        if (playerSprayList != null) playerSprayList.remove(spray);
 
-        List<SprayBase> locSprayList = locationSprayMap.getOrDefault(spray.block, new ArrayList<>());
-        if (!locSprayList.isEmpty()) locSprayList.remove(spray);
-        locationSprayMap.put(spray.block, locSprayList);
+        List<SprayBase> locSprayList = locationSprayMap.get(spray.block);
+        if (locSprayList != null) locSprayList.remove(spray);
 
         itemframeIdMap.remove(spray.itemFrameId);
     }

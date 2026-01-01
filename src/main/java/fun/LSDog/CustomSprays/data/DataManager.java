@@ -26,6 +26,7 @@ import java.util.zip.Inflater;
 public class DataManager {
 
     public static IData data;
+    public static boolean isMySQL = false;
     public static boolean debug = true;
     public static boolean usePapi = false;
     public static boolean spray_particle = true;
@@ -152,16 +153,18 @@ public class DataManager {
             case MYSQL:
                 CustomSprays.log("§8use [MYSQL]");
                 DataMySQL.createTableIfNotExist();
-                data = new DataMySQL();
+                data = new CachedData(new DataMySQL());
+                isMySQL = true;
                 break;
             default:
             case YML:
                 CustomSprays.log("§8use [YML]");
                 try {
-                    data = new DataYml();
+                    data = new CachedData(new DataYml());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                isMySQL = false;
         }
         if (defaultImageFile.exists()) {
             try {

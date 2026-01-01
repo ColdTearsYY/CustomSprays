@@ -12,4 +12,6 @@ public interface IData {
 
     boolean getCopyAllowed(Player player);
 
+    default void invalidateCache(Player player) {}
+
 }

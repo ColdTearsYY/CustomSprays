@@ -6,7 +6,6 @@ import fun.LSDog.CustomSprays.util.NMS;
 import fun.LSDog.CustomSprays.util.RayTracer;
 import fun.LSDog.CustomSprays.util.RegionChecker;
 import fun.LSDog.CustomSprays.util.VaultChecker;
-import io.netty.util.internal.ConcurrentSet;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -25,7 +24,7 @@ public abstract class SprayBase implements ISpray {
 
     public final Player player;
     protected final World world;
-    protected final Set<UUID> playersShown = new ConcurrentSet<>();
+    protected final Set<UUID> playersShown = java.util.concurrent.ConcurrentHashMap.newKeySet();
 
     public Block block;
     public Location location;
@@ -92,11 +91,9 @@ public abstract class SprayBase implements ISpray {
 
         // Call PlayerSprayEvent
         boolean canceled;
-        if (Bukkit.isPrimaryThread()) {
-            canceled = SprayManager.callSprayEvent(player, this);
-        } else try {
-            canceled = Bukkit.getScheduler().callSyncMethod(CustomSprays.plugin, () -> SprayManager.callSprayEvent(player, this)).get();
-        } catch (InterruptedException | ExecutionException e) {
+        try {
+            canceled = fun.LSDog.CustomSprays.util.SchedulerUtil.callSyncMethod(CustomSprays.plugin, player, () -> SprayManager.callSprayEvent(player, this));
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
@@ -114,7 +111,7 @@ public abstract class SprayBase implements ISpray {
         }
 
         SprayManager.addSpray(this);
-        if (removeTick >= 0) Bukkit.getScheduler().runTaskLaterAsynchronously(CustomSprays.plugin, this::remove, removeTick);
+        if (removeTick >= 0) fun.LSDog.CustomSprays.util.SchedulerUtil.runTaskLater(CustomSprays.plugin, location, this::remove, removeTick);
 
         return true;
     }
