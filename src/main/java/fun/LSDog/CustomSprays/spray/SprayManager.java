@@ -582,4 +582,25 @@ public class SprayManager {
         }
         return !type.isTransparent();
     }
+
+    /**
+     * Start a task to clean expired sprays
+     */
+    public static void startCleanerTask() {
+        fun.LSDog.CustomSprays.util.SchedulerUtil.runTaskTimer(CustomSprays.plugin, () -> {
+            List<SprayBase> toRemove = new ArrayList<>();
+            for (SprayBase spray : itemframeIdMap.values()) {
+                if (spray.expireTime > 0 && System.currentTimeMillis() > spray.expireTime) {
+                    toRemove.add(spray);
+                }
+            }
+            toRemove.forEach(spray -> {
+                try {
+                    fun.LSDog.CustomSprays.util.SchedulerUtil.runTask(CustomSprays.plugin, spray.location, spray::remove);
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+            });
+        }, 20L, 20L);
+    }
 }

@@ -43,6 +43,14 @@ public class SchedulerUtil {
         }
     }
 
+    public static void runTask(Plugin plugin, Location location, Runnable runnable) {
+        if (isFolia) {
+            Bukkit.getRegionScheduler().execute(plugin, location, runnable);
+        } else {
+            Bukkit.getScheduler().runTask(plugin, runnable);
+        }
+    }
+
     public static void runTaskAsynchronously(Plugin plugin, Runnable runnable) {
         if (isFolia) {
             Bukkit.getAsyncScheduler().runNow(plugin, task -> runnable.run());
@@ -80,6 +88,14 @@ public class SchedulerUtil {
             Bukkit.getAsyncScheduler().runDelayed(plugin, task -> runnable.run(), delay * 50, java.util.concurrent.TimeUnit.MILLISECONDS);
         } else {
             Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, runnable, delay);
+        }
+    }
+
+    public static void runTaskTimer(Plugin plugin, Runnable runnable, long delay, long period) {
+        if (isFolia) {
+            Bukkit.getGlobalRegionScheduler().runAtFixedRate(plugin, task -> runnable.run(), delay, period);
+        } else {
+            Bukkit.getScheduler().runTaskTimer(plugin, runnable, delay, period);
         }
     }
 

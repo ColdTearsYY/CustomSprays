@@ -56,7 +56,7 @@ public class ParticleUtil {
                             0.2 /* move speed */
                     );
                 }
-            }, i * delayTicks);
+            }, Math.max(1, i * delayTicks));
         }
     }
 

@@ -20,7 +20,7 @@ import java.util.concurrent.ExecutionException;
 
 public abstract class SprayBase implements ISpray {
 
-    public boolean valid = false;
+    public volatile boolean valid = false;
 
     public final Player player;
     protected final World world;
@@ -32,6 +32,8 @@ public abstract class SprayBase implements ISpray {
     public double distance;
     protected int intDirection;
     protected int intRotation;
+
+    public long expireTime = -1;
 
     protected final byte[] pixels;
 
@@ -111,7 +113,10 @@ public abstract class SprayBase implements ISpray {
         }
 
         SprayManager.addSpray(this);
-        if (removeTick >= 0) fun.LSDog.CustomSprays.util.SchedulerUtil.runTaskLater(CustomSprays.plugin, location, this::remove, removeTick);
+        if (removeTick >= 0) {
+            this.expireTime = System.currentTimeMillis() + removeTick * 50;
+            fun.LSDog.CustomSprays.util.SchedulerUtil.runTaskLater(CustomSprays.plugin, location, this::remove, removeTick);
+        }
 
         return true;
     }

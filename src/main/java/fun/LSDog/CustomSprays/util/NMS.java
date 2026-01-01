@@ -359,7 +359,17 @@ public class NMS {
     }
 
     public static Class<?> getPacketClass(String packetName) {
-        return getMcClass("network.protocol.game."+packetName, packetName);
+        String newName = packetName;
+        if (subVer >= 17) {
+            switch (packetName) {
+                case "PacketPlayOutEntityDestroy": newName = "ClientboundRemoveEntitiesPacket"; break;
+                case "PacketPlayOutSpawnEntity": newName = "ClientboundAddEntityPacket"; break;
+                case "PacketPlayOutEntityMetadata": newName = "ClientboundSetEntityDataPacket"; break;
+                case "PacketPlayOutMap": newName = "ClientboundMapItemDataPacket"; break;
+                case "PacketPlayOutSetSlot": newName = "ClientboundContainerSetSlotPacket"; break;
+            }
+        }
+        return getMcClass("network.protocol.game."+newName, packetName);
     }
 
     public static Object getMcWorld(World world) throws Throwable {

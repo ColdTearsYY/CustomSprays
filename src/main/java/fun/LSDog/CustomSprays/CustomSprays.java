@@ -117,6 +117,8 @@ public class CustomSprays extends JavaPlugin {
             });
         }
 
+        fun.LSDog.CustomSprays.spray.SprayManager.startCleanerTask();
+
         log("§eCustomSprays§r Enabled! plugin by §b§lLSDog§r."+" §8(Running on "+ NMS.getMcVer()+" | " +
                 (NMS.SP ? "Spigot" : "Mojang") + " mapping)");
     }
